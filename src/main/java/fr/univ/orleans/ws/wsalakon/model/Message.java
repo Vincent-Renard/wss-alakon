@@ -1,9 +1,7 @@
 package fr.univ.orleans.ws.wsalakon.model;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
+
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 /**
@@ -12,13 +10,11 @@ import lombok.experimental.FieldDefaults;
  */
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
+@Setter
+@NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class Message {
     long id;
-    final String texte;
+    String texte;
 
-    public Message(String texte) {
-        this.texte = texte;
-    }
 }

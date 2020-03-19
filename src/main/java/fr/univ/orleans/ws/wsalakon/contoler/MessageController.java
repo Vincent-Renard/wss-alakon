@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -21,14 +20,14 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 
 @RestController
-@RequestMapping("/api/messages")
+@RequestMapping("/api")
 public class MessageController {
 
     private static final Logger log = LoggerFactory.getLogger(MessageController.class);
     private List<Message> messages = new ArrayList<>();
     private final AtomicLong counter =new AtomicLong(1L);
 
-    @PostMapping("/")
+    @PostMapping("/messages")
     ResponseEntity<Message> create(@RequestBody Message message){
         log.debug(message.toString());
         Message m = new Message(counter.getAndIncrement(),message.getTexte());
@@ -39,13 +38,14 @@ public class MessageController {
 
             return ResponseEntity.created(loc).body(m);
     }
-    @GetMapping("/")
+
+    @GetMapping("/messages")
     ResponseEntity<Collection<Message>> getAll(){
         return ResponseEntity.ok(messages);
     }
 
 
-    @GetMapping("/{id}")
+    @GetMapping("/messages/{id}")
     ResponseEntity<Message> findById(@PathVariable long id){
         Optional<Message> m = messages.stream().filter(message ->message.getId()==id).findAny();
         if (m.isPresent())
@@ -55,26 +55,26 @@ public class MessageController {
 
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/messages/{id}")
     ResponseEntity deleteById(@PathVariable long id){
 
-        for (int idx = 0; idx <messages.size(); idx++) {
-            if (messages.get(idx).getId()==id){
+        for (int idx = 0; idx < messages.size(); idx++) {
+            if (messages.get(idx).getId() == id) {
                 messages.remove(idx);
                 return ResponseEntity.noContent().build();
             }
         }
-            return ResponseEntity.notFound().build();
+        return ResponseEntity.notFound().build();
 
     }
 
-    @PatchMapping("/{id}")
-    ResponseEntity<Message> deleteById(@PathVariable long id,@RequestBody String texte){
+    @PatchMapping("/messages/{id}")
+    ResponseEntity<Message> patch(@PathVariable long id, @RequestBody Message mtopatch) {
 
-        for (int idx = 0; idx <messages.size(); idx++) {
-            if (messages.get(idx).getId()==id){
-                Message m = new Message(id,texte);
-                messages.set(idx,m);
+        for (int idx = 0; idx < messages.size(); idx++) {
+            if (messages.get(idx).getId() == id) {
+                Message m = new Message(id, mtopatch.getTexte());
+                messages.set(idx, m);
                 return ResponseEntity.ok(m);
             }
         }
