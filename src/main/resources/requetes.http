@@ -27,20 +27,20 @@ Content-Type: application/json
 
 ###
 DELETE http://localhost:8080/api/messages/1
-Authorization: Basic fred fred
+Authorization: Basic admin admin
 Accept: application/json
 
 ###
 
 
-GET http://localhost:8080/api/messages/
+GET http://localhost:8080/api/messages
 Accept: application/json
 
 ###
 
 
 PATCH http://localhost:8080/api/messages/2
-Authorization: Basic fred fred
+Authorization: Basic admin admin
 Content-Type: application/json
 
 {
@@ -48,14 +48,13 @@ Content-Type: application/json
 }
 
 
-
 ###
 GET http://localhost:8080/api/messages/2
-Authorization: Basic fred fred
+Authorization: Basic admin admin
 Accept: application/json
 
 ###
-GET http://localhost:8080/api/messages/
+GET http://localhost:8080/api/messages
 Accept: application/json
 
 ###
