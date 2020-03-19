@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,15 +29,16 @@ public class MessageController {
     private final AtomicLong counter =new AtomicLong(1L);
 
     @PostMapping("/messages")
-    ResponseEntity<Message> create(@RequestBody Message message){
+    ResponseEntity<Message> create(Principal principal, @RequestBody Message message) {
         log.debug(message.toString());
-        Message m = new Message(counter.getAndIncrement(),message.getTexte());
+        String login = principal.getName();
+        Message m = new Message(counter.getAndIncrement(), "[" + login + "] : " + message.getTexte());
         messages.add(m);
         URI loc = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(m.getId()).toUri();
 
-            return ResponseEntity.created(loc).body(m);
+        return ResponseEntity.created(loc).body(m);
     }
 
     @GetMapping("/messages")

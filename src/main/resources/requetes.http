@@ -4,7 +4,7 @@ GET http://localhost:8080/api/messages
 ###
 
 POST http://localhost:8080/api/messages
-Authorization: Basic fred fred
+Authorization: Basic Vincent vinc
 Content-Type: application/json
 
 {
@@ -13,12 +13,12 @@ Content-Type: application/json
 
 ###
 GET http://localhost:8080/api/messages/1
-Authorization: Basic fred fred
+Authorization: Basic Vincent vinc
 Accept: application/json
 
 ###
 POST http://localhost:8080/api/messages/
-Authorization: Basic fred fred
+Authorization: Basic Vincent vinc
 Content-Type: application/json
 
 {
