@@ -177,3 +177,9 @@ Authorization: Basic yoyo3 yoyo3
 Content-Type: application/json
 
 ###
+
+GET http://localhost:8080/api/users/Vincent/messages
+Authorization: Basic fred fred
+Content-Type: application/json
+
+###

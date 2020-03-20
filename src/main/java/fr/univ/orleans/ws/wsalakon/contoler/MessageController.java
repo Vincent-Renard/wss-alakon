@@ -15,9 +15,12 @@ import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * @autor Vincent
@@ -29,7 +32,7 @@ import java.util.function.Predicate;
 public class MessageController {
 
     private static final Logger log = LoggerFactory.getLogger(MessageController.class);
-    private List<Message> messages = new ArrayList<>();
+    private Map<Long, Message> messages = new TreeMap<>();
     @Getter
     private static Map<String, Utilisateur> usersByPseudo = new TreeMap<>();
     Predicate<String> verifMessage = ch -> ch.length() > 1 && ch.length() < 256;
@@ -49,8 +52,9 @@ public class MessageController {
             ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).build();
         }
         String login = principal.getName();
-        Message m = new Message(counter.getAndIncrement(), message.getTexte(), login, LocalDateTime.now());
-        messages.add(m);
+        long id = counter.getAndIncrement();
+        Message m = new Message(id, message.getTexte(), login, LocalDateTime.now());
+        messages.put(id, m);
         URI loc = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(m.getId()).toUri();
@@ -60,15 +64,15 @@ public class MessageController {
 
     @GetMapping("/messages")
     ResponseEntity<Collection<Message>> getAll(){
-        return ResponseEntity.ok(messages);
+        return ResponseEntity.ok(messages.values());
     }
 
 
     @GetMapping("/messages/{id}")
-    ResponseEntity<Message> findById(@PathVariable long id){
-        Optional<Message> m = messages.stream().filter(message ->message.getId()==id).findAny();
-        if (m.isPresent())
-            return ResponseEntity.ok(m.get());
+    ResponseEntity<Message> findById(@PathVariable long id) {
+        // Optional<Message> m = messages.stream().filter(message ->message.getId()==id).findAny();
+        if (messages.containsKey(id))
+            return ResponseEntity.ok(messages.get(id));
         else
             return ResponseEntity.notFound().build();
 
@@ -77,35 +81,34 @@ public class MessageController {
     @DeleteMapping("/messages/{id}")
     ResponseEntity deleteById(Principal up, @PathVariable long id) {
 
-        for (int idx = 0; idx < messages.size(); idx++) {
-            if (messages.get(idx).getId() == id) {
-                if (messages.get(idx).getExp().equals(up.getName()) || usersByPseudo.get(up.getName()).isAdmin()) {
-                    messages.remove(idx);
-                    return ResponseEntity.noContent().build();
-                } else return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
+        if (messages.containsKey(id)) {
+            if (messages.get(id).getExp().equals(up.getName()) || usersByPseudo.get(up.getName()).isAdmin()) {
+
+                messages.remove(id);
+                return ResponseEntity.noContent().build();
+            } else return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.notFound().build();
+
     }
 
     @PatchMapping("/messages/{id}")
     ResponseEntity<Message> patch(Principal principal, @PathVariable long id, @RequestBody @NotNull Message message) {
 
-        if (!verifMessage.test(message.getTexte())) {
-            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).build();
-        }
-        for (int idx = 0; idx < messages.size(); idx++) {
-            if (messages.get(idx).getId() == id) {
-                Message oldOne = messages.get(idx);
-                if (oldOne.getExp().equals(principal.getName()) || !usersByPseudo.get(principal.getName()).isAdmin()) {
-                    oldOne.setTexte(message.getTexte());
-                    messages.set(idx, oldOne);
-                    return ResponseEntity.ok(oldOne);
-                } else ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (messages.containsKey(id)) {
+            if (!verifMessage.test(message.getTexte())) {
+                return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).build();
             }
+            Message oldOne = messages.get(id);
+            if (oldOne.getExp().equals(principal.getName())) {
+                oldOne.setTexte(message.getTexte());
+                messages.put(id, oldOne);
+                return ResponseEntity.ok(oldOne);
+            } else ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         return ResponseEntity.notFound().build();
     }
+
 
     @PostMapping("/users")
     ResponseEntity<Utilisateur> register(@RequestBody Utilisateur user) {
@@ -138,6 +141,17 @@ public class MessageController {
         Utilisateur u = usersByPseudo.get(pseudo);
 
         return ResponseEntity.ok().body(u);
+    }
+
+    @GetMapping("/users/{login}/messages")
+    ResponseEntity<Collection<Message>> findByUser(@PathVariable("login") String pseudo) {
+        if (usersByPseudo.containsKey(pseudo)) {
+            return ResponseEntity.ok().body(messages.values()
+                    .stream().filter(m -> m.getExp().equals(pseudo))
+                    .collect(Collectors.toList()));
+        }
+        return ResponseEntity.notFound().build();
+
     }
 
     @GetMapping("/users2/{login}")
