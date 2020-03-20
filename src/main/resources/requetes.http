@@ -109,7 +109,7 @@ Content-Type: application/json
 
 ###
 POST http://localhost:8080/api/messages/
-Authorization: Basic yoyo2 yoyo2
+Authorization: Basic fred fred
 Content-Type: application/json
 
 {
@@ -189,6 +189,24 @@ Content-Type: application/json
 
 ###
 
+GET http://localhost:8080/api/users
+Authorization: Basic fred fred
+Content-Type: application/json
+
+###
+DELETE http://localhost:8080/api/users/fred
+Authorization: Basic fred fred
+Content-Type: application/json
+
+###
+
+
+
+GET http://localhost:8080/api/messages
+Authorization: Basic fred fred
+Content-Type: application/json
+
+###
 GET http://localhost:8080/api/users
 Authorization: Basic fred fred
 Content-Type: application/json

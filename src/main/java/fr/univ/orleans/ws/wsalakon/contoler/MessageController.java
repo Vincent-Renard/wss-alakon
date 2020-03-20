@@ -79,7 +79,7 @@ public class MessageController {
     }
 
     @DeleteMapping("/messages/{id}")
-    ResponseEntity deleteById(Principal up, @PathVariable long id) {
+    ResponseEntity<Void> deleteById(Principal up, @PathVariable long id) {
 
         if (messages.containsKey(id)) {
             if (messages.get(id).getExp().equals(up.getName()) || usersByPseudo.get(up.getName()).isAdmin()) {
@@ -173,4 +173,32 @@ public class MessageController {
         return ResponseEntity.ok().body(u);
     }
 
+    //@PreAuthorize("#pseudo == authentication.principal.username")
+    @DeleteMapping("/users/{login}")
+    ResponseEntity<Void> delUser(Principal p, @PathVariable("login") String pseudo) {
+        System.out.println(usersByPseudo.get(pseudo));
+        System.out.println(usersByPseudo.get(p.getName()));
+        System.out.println(!usersByPseudo.get(p.getName()).isAdmin());
+        System.out.println(!pseudo.equals(p.getName()));
+        System.out.println(!pseudo.equals(p.getName()) && !usersByPseudo.get(p.getName()).isAdmin());
+        if (!pseudo.equals(p.getName()) && !usersByPseudo.get(p.getName()).isAdmin()) {
+            System.out.println("pas admin");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (!usersByPseudo.containsKey(pseudo)) {
+            return ResponseEntity.notFound().build();
+        }
+        Collection<Long> mOfUser = messages.values()
+                .stream()
+                .filter(m -> m.getExp().equals(pseudo))
+                .map(Message::getId)
+                .collect(Collectors.toSet());
+        System.out.println();
+        mOfUser.forEach(System.out::println);
+        mOfUser.forEach(id -> messages.remove(id));
+        //.forEach(i-> messages.remove(i));
+        usersByPseudo.remove(pseudo);
+        return ResponseEntity.noContent().build();
+    }
 }
