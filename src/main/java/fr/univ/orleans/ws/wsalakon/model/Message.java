@@ -4,6 +4,8 @@ package fr.univ.orleans.ws.wsalakon.model;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 /**
  * @autor Vincent
  * @date 19/03/2020
@@ -16,5 +18,7 @@ import lombok.experimental.FieldDefaults;
 public class Message {
     long id;
     String texte;
+    String exp;
+    LocalDateTime dateMsg;
 
 }

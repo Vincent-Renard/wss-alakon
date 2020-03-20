@@ -11,6 +11,9 @@ Content-Type: application/json
   "texte": "Salut"
 }
 
+
+
+
 ###
 GET http://localhost:8080/api/messages/1
 Authorization: Basic Vincent vinc
@@ -49,6 +52,16 @@ Content-Type: application/json
 
 PATCH http://localhost:8080/api/messages/3
 Authorization: Basic admin admin
+Content-Type: application/json
+
+{
+  "texte": "Salut"
+}
+
+###
+
+PATCH http://localhost:8080/api/messages/3
+Authorization: Basic Vincent vinc
 Content-Type: application/json
 
 {
@@ -98,7 +111,7 @@ Content-Type: application/json
   "texte": "Yo! c'est Yo"
 }
 
-###
+###KO
 
 
 GET http://localhost:8080/api/users/yoyo2
@@ -116,13 +129,13 @@ GET http://localhost:8080/api/users/yoyo2
 Authorization: Basic yoyo2 yoyo2
 Content-Type: application/json
 
-###OK?
+###KO
 
 GET http://localhost:8080/api/users2/yoyo2
 Authorization: Basic admin admin
 Content-Type: application/json
 
-###
+###KO
 
 
 
@@ -130,7 +143,7 @@ GET http://localhost:8080/api/users2/yoyo2
 Authorization: Basic fred fred
 Content-Type: application/json
 
-###
+###OK
 
 GET http://localhost:8080/api/users2/yoyo2
 Authorization: Basic yoyo2 yoyo2
@@ -151,13 +164,13 @@ Content-Type: application/json
   "admin": true
 }
 
-###
+###KO
 
 GET http://localhost:8080/api/users2/yoyo3
 Authorization: Basic fred fred
 Content-Type: application/json
 
-###
+###OK
 
 GET http://localhost:8080/api/users2/yoyo3
 Authorization: Basic yoyo3 yoyo3

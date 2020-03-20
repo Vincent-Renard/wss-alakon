@@ -11,8 +11,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
@@ -30,7 +32,7 @@ public class MessageController {
     private List<Message> messages = new ArrayList<>();
     @Getter
     private static Map<String, Utilisateur> usersByPseudo = new TreeMap<>();
-
+    Predicate<String> verifMessage = ch -> ch.length() > 1 && ch.length() < 256;
 
     private final AtomicLong counter = new AtomicLong(1L);
 
@@ -43,9 +45,11 @@ public class MessageController {
 
     @PostMapping("/messages")
     ResponseEntity<Message> create(Principal principal, @RequestBody Message message) {
-        log.debug(message.toString());
+        if (!verifMessage.test(message.getTexte())) {
+            ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).build();
+        }
         String login = principal.getName();
-        Message m = new Message(counter.getAndIncrement(), "[" + login + "] : " + message.getTexte());
+        Message m = new Message(counter.getAndIncrement(), message.getTexte(), login, LocalDateTime.now());
         messages.add(m);
         URI loc = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -71,26 +75,33 @@ public class MessageController {
     }
 
     @DeleteMapping("/messages/{id}")
-    ResponseEntity deleteById(@PathVariable long id){
+    ResponseEntity deleteById(Principal up, @PathVariable long id) {
 
         for (int idx = 0; idx < messages.size(); idx++) {
             if (messages.get(idx).getId() == id) {
-                messages.remove(idx);
-                return ResponseEntity.noContent().build();
+                if (messages.get(idx).getExp().equals(up.getName()) || usersByPseudo.get(up.getName()).isAdmin()) {
+                    messages.remove(idx);
+                    return ResponseEntity.noContent().build();
+                } else return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         }
         return ResponseEntity.notFound().build();
-
     }
 
     @PatchMapping("/messages/{id}")
-    ResponseEntity<Message> patch(@PathVariable long id, @RequestBody Message mtopatch) {
+    ResponseEntity<Message> patch(Principal principal, @PathVariable long id, @RequestBody @NotNull Message message) {
 
+        if (!verifMessage.test(message.getTexte())) {
+            return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).build();
+        }
         for (int idx = 0; idx < messages.size(); idx++) {
             if (messages.get(idx).getId() == id) {
-                Message m = new Message(id, mtopatch.getTexte());
-                messages.set(idx, m);
-                return ResponseEntity.ok(m);
+                Message oldOne = messages.get(idx);
+                if (oldOne.getExp().equals(principal.getName()) || !usersByPseudo.get(principal.getName()).isAdmin()) {
+                    oldOne.setTexte(message.getTexte());
+                    messages.set(idx, oldOne);
+                    return ResponseEntity.ok(oldOne);
+                } else ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
         }
         return ResponseEntity.notFound().build();
