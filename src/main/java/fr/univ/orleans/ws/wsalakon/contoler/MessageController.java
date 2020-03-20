@@ -129,6 +129,12 @@ public class MessageController {
         return ResponseEntity.created(loc).body(user);
     }
 
+    @GetMapping("/users")
+    ResponseEntity<Collection<String>> getUsers() {
+
+        return ResponseEntity.ok().body(usersByPseudo.keySet());
+    }
+
     @GetMapping("/users/{pseudo}")
     ResponseEntity<Utilisateur> findById(Principal principal, @PathVariable String pseudo) {
         if (!principal.getName().equals(pseudo)) {
