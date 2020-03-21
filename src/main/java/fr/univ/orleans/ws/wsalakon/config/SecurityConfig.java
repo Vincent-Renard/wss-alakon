@@ -19,31 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-   /* @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("fred").password("{noop}fred").roles("USER")
-                .and()
-                .withUser("admin").password("{noop}admin").roles("USER", "ADMIN");
 
-    }*/
-/*
-    @Bean
-    @Override
-    protected UserDetailsService userDetailsService() {
-        UserDetails vins = User.builder().
-                username("Vincent")
-                .password("{noop}vinc")
-                .roles("USER").build();
-
-        UserDetails admin = User.builder().
-                username("admin")
-                .password("{noop}admin")
-                .roles("USER", "ADMIN").build();
-        return new InMemoryUserDetailsManager(vins, admin);
-
-    }
-    */
 
     @Bean
     @Override
@@ -60,8 +36,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/swagger-ui/").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/messages").permitAll()
-                //.antMatchers(HttpMethod.DELETE, "/api/**").hasRole("ADMIN")
-                //.antMatchers(HttpMethod.PATCH, "/api/**").hasRole("ADMIN")
                 .antMatchers(HttpMethod.POST, "/api/users").hasRole("ADMIN")
                 .anyRequest().hasRole("USER")
                 .and()
